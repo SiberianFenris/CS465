@@ -1,5 +1,5 @@
 /* GET homepage */
-const index = (req, res) => { // This is the controller for the homepage.
+const index = (req, res) => {
     res.render('index', { title: 'Travlr Getaways' });
 };
 
