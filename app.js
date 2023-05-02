@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 const hbs = require('hbs');
 
+require('./app_server/database/db'); // This is the database connection (see db.js)
+
 var indexRouter = require('./app_server/routes/index');
 var usersRouter = require('./app_server/routes/users');
 var travelRouter = require('./app_server/routes/travel');
