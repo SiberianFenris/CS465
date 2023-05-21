@@ -6,13 +6,13 @@ const readLine = require('readline');
 mongoose.set('useUnifiedTopology', true);
 
 const connect = () => {
-    setTimeout(() => mongoose.connect(dbURI, {
-        userNewUrlParser: true,
+    setTimeout(() => mongoose.connect(conn_uri, {
+        useNewUrlParser: true,
         useCreateIndex: true
     }), 1000);
-    }
+}
 
-mongoose.connection.on('connected', () => { console.log(`Mongoose connected to ${dbURI}`); });
+mongoose.connection.on('connected', () => { console.log(`Mongoose connected to ${conn_uri}`); });
 mongoose.connection.on('error', err => { console.log('Mongoose connection error:', err); });
 mongoose.connection.on('disconnected', () => { console.log('Mongoose disconnected'); });
 
@@ -23,25 +23,24 @@ const gracefulShutdown = (msg, callback) => {
     });
 };
 
-// For nodemon restarts
 process.once('SIGUSR2', () => {
     gracefulShutdown('nodemon restart', () => {
         process.kill(process.pid, 'SIGUSR2');
     });
 });
 
-// For app termination
 process.on('SIGINT', () => {
     gracefulShutdown('app termination', () => {
         process.exit(0);
     });
 });
 
-// For Heroku app termination
 process.on('SIGTERM', () => {
-    gracefulShutdown('Heroku app shutdown', () => {
+    gracefulShutdown('app shutdown', () => {
         process.exit(0);
     });
 });
 
-require('./models/travlr');
+connect();  // Call the connect function to establish the database connection
+
+require('./travlr');
