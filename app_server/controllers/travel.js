@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const apiOptions = {
+    server: 'http://localhost:3000'
+};
 
 const trips = mongoose.model('trips');
 
