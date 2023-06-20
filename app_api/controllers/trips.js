@@ -112,9 +112,9 @@ const tripsUpdateTrip = async (req, res) => {
 }
 
 const deleteTrip = async (req, res) => {
-    getUser(req, res, (req, res) => {
-      const tripCode = req.params.tripCode;
+    const tripCode = req.params.tripCode;
   
+    getUser(req, res, (req, res, userName) => {
       Trip.findOneAndDelete({ code: tripCode })
         .then(deletedTrip => {
           if (!deletedTrip) {
@@ -126,7 +126,7 @@ const deleteTrip = async (req, res) => {
           res.status(500).json(error);
         });
     });
-  };  
+};  
   
 
 const getUser = (req, res, callback) => {

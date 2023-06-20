@@ -1,6 +1,5 @@
-import { Injectable , Inject } from '@angular/core';
-import { Http } from '@angular/http';
-
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http'; // Update the import statement
 import { Trip } from '../models/trip';
 import { BROWSER_STORAGE } from '../storage';
 import { User } from '../models/user';
@@ -10,77 +9,82 @@ import { AuthResponse } from '../models/authresponse';
 export class TripDataService {
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     @Inject(BROWSER_STORAGE) private storage: Storage
-    ) { }
+  ) { }
 
   private apiBaseUrl = 'http://localhost:3000/api/';
   private tripUrl = `${this.apiBaseUrl}trips/`;
 
+  private createAuthorizationHeader(): HttpHeaders {
+    const token = this.storage.getItem('travlr-token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return headers;
+  }
+  
   public getTrips(): Promise<Trip[]> {
     console.log('Inside TripDataService#getTrips');
+    const headers = this.createAuthorizationHeader();
     return this.http
-      .get(`${this.apiBaseUrl}trips`)
+      .get<Trip[]>(`${this.apiBaseUrl}trips`, { headers })
       .toPromise()
-      .then(response => response.json() as Trip[])
       .catch(this.handleError);
   }
-
+  
   public getTrip(tripCode: string): Promise<Trip> {
     console.log('Inside TripDataService#getTrip');
+    const headers = this.createAuthorizationHeader();
     return this.http
-      .get(this.tripUrl + tripCode)
+      .get<Trip>(this.tripUrl + tripCode, { headers })
       .toPromise()
-      .then(response => response.json() as Trip)
       .catch(this.handleError);
   }
 
   public addTrip(formData: Trip): Promise<Trip> {
     console.log('Inside TripDataService#addTrip');
+    const headers = this.createAuthorizationHeader();
     return this.http
-      .post(this.tripUrl, formData)
+      .post<Trip>(this.tripUrl, formData, { headers }) // Use generics to specify the response type
       .toPromise()
-      .then(response => response.json() as Trip[])
       .catch(this.handleError);
   }
 
   public updateTrip(formData: Trip): Promise<Trip> {
     console.log('Inside TripDataService#updateTrip');
+    const headers = this.createAuthorizationHeader();
     return this.http
-      .put(this.tripUrl + formData.code, formData)
+      .put<Trip>(this.tripUrl + formData.code, formData, { headers }) // Use generics to specify the response type
       .toPromise()
-      .then(response => response.json() as Trip[])
       .catch(this.handleError);
   }
 
   public deleteTrip(tripCode: string): Promise<Trip> {
-    console.log('Inside TripDataService#deleteTrip')
+    console.log('Inside TripDataService#deleteTrip');
+    const headers = this.createAuthorizationHeader();
     return this.http
-      .delete(this.tripUrl + tripCode)
+      .delete<Trip>(this.tripUrl + tripCode, { headers })
       .toPromise()
-      .then(response => response.json() as Trip) // Convert the response to Trip type
       .catch(this.handleError);
-  }  
+  }
 
   private handleError(error: any): Promise<any> {
-    console.error('Something has gone wrong', error); // for demo purposes only
+    console.error('Something has gone wrong', error);
     return Promise.reject(error.message || error);
   }
 
   public login(user: User): Promise<AuthResponse> {
-     return this.makeAuthApiCall('login', user);
+    return this.makeAuthApiCall('login', user);
   }
 
   public register(user: User): Promise<AuthResponse> {
-     return this.makeAuthApiCall('register', user);
+    return this.makeAuthApiCall('register', user);
   }
 
   private makeAuthApiCall(urlPath: string, user: User): Promise<AuthResponse> {
     const url: string = `${this.apiBaseUrl}/${urlPath}`;
     return this.http
-      .post(url, user)
+      .post<AuthResponse>(url, user, { headers: this.createAuthorizationHeader() }) // Use generics to specify the response type
       .toPromise()
-      .then(response => response.json() as AuthResponse)
       .catch(this.handleError);
   }
 }
